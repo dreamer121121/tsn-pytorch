@@ -104,7 +104,7 @@ class TSNDataSet(data.Dataset):
         for seg_ind in indices:
             p = int(seg_ind)
             for i in range(self.new_length):
-                seg_imgs = self._load_image(record.path, p) #读入一帧图片
+                seg_imgs = self._load_image(self.root_path+record.path, p) #读入一帧图片
                 images.extend(seg_imgs)
                 if p < record.num_frames:
                     p += 1
