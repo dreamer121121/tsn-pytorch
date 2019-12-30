@@ -80,7 +80,7 @@ TSN Configurations:
 
         if 'resnet' in base_model or 'vgg' in base_model:
             self.base_model = getattr(torchvision.models, base_model)(False)
-            self.base_model.last_layer_name = 'fc'
+            self.base_model.last_layer_name = 'fc'#将base_model的最后一层改名为fc
             self.input_size = 224
             self.input_mean = [0.485, 0.456, 0.406]
             self.input_std = [0.229, 0.224, 0.225]

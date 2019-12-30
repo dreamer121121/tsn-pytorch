@@ -40,10 +40,17 @@ def main():
     pretrained_dict = {}
     for key,value in state_dict.items():
         pretrained_dict['base_model.'+key] = value
-    # print(pretrained_dict.keys())
-    print(model.state_dict())
-    model.load_state_dict(pretrained_dict) #模型加载预训练权重
-    
+
+    model_dict = model.state_dict()
+
+    #filter weight
+    pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+    print(pretrained_dict.keys())
+
+    model_dict.update(pretrained_dict)
+
+    model.load_state_dict(model_dict) #模型加载预训练权重
+
 
     crop_size = model.crop_size
     scale_size = model.scale_size
