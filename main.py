@@ -17,7 +17,9 @@ from opts import parser
 
 best_prec1 = 0
 
-
+model_urls = {
+    'resnet101':'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'
+}
 def main():
     global args, best_prec1
     args = parser.parse_args()
@@ -34,7 +36,8 @@ def main():
     model = TSN(num_class, args.num_segments, args.modality,
                 base_model=args.arch,
                 consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn) #只返回网络结构
-    model.load_state_dict(torch.load('./resnet101-5d3b4d8f.pth')) #加载下载的预训练模型权重
+    model.load_state_dict(model_zoo.load_url(model_urls[args.arch],model_dir='./')) #加载下载的预训练模型权重
+    # print(model.state_dict())
 
     crop_size = model.crop_size
     scale_size = model.scale_size
