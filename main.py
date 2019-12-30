@@ -38,7 +38,7 @@ def main():
                 consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn) #只返回网络结构
     state_dict = model_zoo.load_url(model_urls[args.arch],model_dir='./')
     for key,value in state_dict.items():
-        key += 'base_model'
+        state_dict['base_model.'+key] = state_dict.pop(key)
     print(state_dict.keys())
 
     crop_size = model.crop_size
