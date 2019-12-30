@@ -89,7 +89,7 @@ class TSNDataSet(data.Dataset):
         return offsets + 1
 
     def __getitem__(self, index):
-        record = self.video_list[index]
+        record = self.video_list[index] # 取出一段视频的record
 
         if not self.test_mode:
             segment_indices = self._sample_indices(record) if self.random_shift else self._get_val_indices(record)
@@ -104,7 +104,7 @@ class TSNDataSet(data.Dataset):
         for seg_ind in indices:
             p = int(seg_ind)
             for i in range(self.new_length):
-                seg_imgs = self._load_image(record.path, p)
+                seg_imgs = self._load_image(record.path, p) #读入一帧图片
                 images.extend(seg_imgs)
                 if p < record.num_frames:
                     p += 1

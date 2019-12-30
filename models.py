@@ -79,7 +79,7 @@ TSN Configurations:
     def _prepare_base_model(self, base_model):
 
         if 'resnet' in base_model or 'vgg' in base_model:
-            self.base_model = getattr(torchvision.models, base_model)(True)
+            self.base_model = getattr(torchvision.models, base_model)(False)
             self.base_model.last_layer_name = 'fc'
             self.input_size = 224
             self.input_mean = [0.485, 0.456, 0.406]
@@ -116,7 +116,7 @@ TSN Configurations:
 
     def train(self, mode=True):
         """
-        Override the default train() to freeze the BN parameters
+        Override the default train() to freeze the BN parameters 通过重写train方法实现PBN
         :return:
         """
         super(TSN, self).train(mode)

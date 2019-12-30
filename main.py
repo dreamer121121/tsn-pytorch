@@ -8,6 +8,7 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
 from torch.nn.utils import clip_grad_norm
+import torch.utils.model_zoo as model_zoo
 
 from dataset import TSNDataSet
 from models import TSN
@@ -32,7 +33,8 @@ def main():
 
     model = TSN(num_class, args.num_segments, args.modality,
                 base_model=args.arch,
-                consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn)
+                consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn) #只返回网络结构
+    model.load_state_dict(torch.load('./resnet101-5d3b4d8f.pth')) #加载下载的预训练模型权重
 
     crop_size = model.crop_size
     scale_size = model.scale_size
@@ -64,7 +66,7 @@ def main():
         normalize = IdentityTransform()
 
     if args.modality == 'RGB':
-        data_length = 1
+        data_length = 1 #每一个segment采集的帧的数量。
     elif args.modality in ['Flow', 'RGBDiff']:
         data_length = 5
 
@@ -151,11 +153,12 @@ def train(train_loader, model, criterion, optimizer, epoch):
         model.module.partialBN(True)
 
     # switch to train mode
-    model.train()
+    model.train() #转换到train模式，此模式也可以自己重写自己定义哪些层需要训练。
 
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
+        # input 每一个sample应该是三张图片。
         data_time.update(time.time() - end)
 
         target = target.cuda(async=True)
