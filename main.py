@@ -36,8 +36,10 @@ def main():
     model = TSN(num_class, args.num_segments, args.modality,
                 base_model=args.arch,
                 consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn) #只返回网络结构
-    model.load_state_dict(model_zoo.load_url(model_urls[args.arch],model_dir='./')) #加载下载的预训练模型权重
+    # model.load_state_dict(model_zoo.load_url(model_urls[args.arch],model_dir='./')) #加载下载的预训练模型权重
     # print(model.state_dict())
+    state_dict = model_zoo.load_url(model_urls[args.arch],model_dir='./')
+    model.load_state_dict(state_dict)
 
     crop_size = model.crop_size
     scale_size = model.scale_size
