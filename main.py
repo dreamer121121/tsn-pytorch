@@ -40,7 +40,8 @@ def main():
     pretrained_dict = {}
     for key,value in state_dict.items():
         pretrained_dict['base_model.'+key] = value
-    print(pretrained_dict.keys())
+    # print(pretrained_dict.keys())
+    model.load_state_dict(pretrained_dict) #模型加载预训练权重
 
     crop_size = model.crop_size
     scale_size = model.scale_size
