@@ -99,7 +99,8 @@ class TSNDataSet(data.Dataset):
         return self.get(record, segment_indices)
 
     def get(self, record, indices):
-
+        #获取一段视频的三帧
+        print(indices)
         images = list()
         for seg_ind in indices:
             p = int(seg_ind)
