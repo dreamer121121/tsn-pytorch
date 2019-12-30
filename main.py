@@ -87,7 +87,7 @@ def main():
         data_length = 5
 
     train_loader = torch.utils.data.DataLoader(
-        TSNDataSet("./jpegs_256/", args.train_list, num_segments=args.num_segments,
+        TSNDataSet("./jpegs_256", args.train_list, num_segments=args.num_segments,
                    new_length=data_length,
                    modality=args.modality,
                    image_tmpl="img_{:05d}.jpg" if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+"{}_{:05d}.jpg",
