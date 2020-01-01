@@ -48,8 +48,9 @@ class TSNDataSet(data.Dataset):
         if self.modality == 'RGB' or self.modality == 'RGBDiff':
             return [Image.open(os.path.join(directory, self.image_tmpl.format(idx))).convert('RGB')]
         elif self.modality == 'Flow':
-            x_img = Image.open(os.path.join(directory, self.image_tmpl.format('x', idx))).convert('L')
-            y_img = Image.open(os.path.join(directory, self.image_tmpl.format('y', idx))).convert('L')
+            #每一次返回两张光流图分为x,y方向各一张。
+            x_img = Image.open(os.path.join(directory+'/u/', self.image_tmpl.format(idx))).convert('L')
+            y_img = Image.open(os.path.join(directory+'/v/', self.image_tmpl.format(idx))).convert('L')
 
             return [x_img, y_img]
 
@@ -89,7 +90,7 @@ class TSNDataSet(data.Dataset):
         return offsets + 1
 
     def __getitem__(self, index):
-        record = self.video_list[index] # 取出一段视频的record
+        record = self.video_list[index] # 取出一段视频，为一个VideoRecord类型
 
         if not self.test_mode:
             segment_indices = self._sample_indices(record) if self.random_shift else self._get_val_indices(record)
@@ -100,11 +101,13 @@ class TSNDataSet(data.Dataset):
 
     def get(self, record, indices):
         #获取一段视频的三帧
-        print(indices)
+        # print(indices)
         images = list()
         for seg_ind in indices:
+            #分段采集
             p = int(seg_ind)
             for i in range(self.new_length):
+                #采集这一段的new_length帧图片，RGB模态的为1帧，optical flow模态的为5帧
                 seg_imgs = self._load_image(self.root_path+record.path, p) #读入一帧图片
                 images.extend(seg_imgs)
                 if p < record.num_frames:

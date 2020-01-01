@@ -79,7 +79,7 @@ TSN Configurations:
     def _prepare_base_model(self, base_model):
 
         if 'resnet' in base_model or 'vgg' in base_model:
-            self.base_model = getattr(torchvision.models, base_model)(False)
+            self.base_model = getattr(torchvision.models, base_model)(True)
             self.base_model.last_layer_name = 'fc'#将base_model的最后一层改名为fc
             self.input_size = 224
             self.input_mean = [0.485, 0.456, 0.406]
@@ -193,18 +193,20 @@ TSN Configurations:
         if self.modality == 'RGBDiff':
             sample_len = 3 * self.new_length
             input = self._get_diff(input)
-
-        base_out = self.base_model(input.view((-1, sample_len) + input.size()[-2:]))
+        #input.size()==>(16,9,224,224) #一个batch16段视频，每段视频采集3帧，每帧都为3通道图像。
+        #input.view(-1,3,224,224)==>(48,3,224,224) #每一个batch总共16段视频，每段视频采集3帧故总共48帧，每帧图片为3通道。
+        base_out = self.base_model(input.view((-1, sample_len) + input.size()[-2:])) #base_out.size() ==> [48,2048],每帧图片通过restnet101后输出2048维特征。
+        print(base_out.size())
 
         if self.dropout > 0:
             base_out = self.new_fc(base_out)
-
+        print(base_out.size())#[48,101]
         if not self.before_softmax:
             base_out = self.softmax(base_out)
         if self.reshape:
-            base_out = base_out.view((-1, self.num_segments) + base_out.size()[1:])
+            base_out = base_out.view((-1, self.num_segments) + base_out.size()[1:]) #[16,3,101]
 
-        output = self.consensus(base_out)
+        output = self.consensus(base_out) #[16,1,101]
         return output.squeeze(1)
 
     def _get_diff(self, input, keep_rgb=False):

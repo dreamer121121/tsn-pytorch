@@ -36,21 +36,20 @@ def main():
     model = TSN(num_class, args.num_segments, args.modality,
                 base_model=args.arch,
                 consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn) #只返回网络结构
-    state_dict = model_zoo.load_url(model_urls[args.arch],model_dir='./')
-    pretrained_dict = {}
-    for key,value in state_dict.items():
-        pretrained_dict['base_model.'+key] = value
-
-    model_dict = model.state_dict()
-
-    #filter weight
-    pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-    # print(pretrained_dict.keys())
-
-    model_dict.update(pretrained_dict)
-
-    model.load_state_dict(model_dict) #模型加载预训练权重
-
+    # state_dict = model_zoo.load_url(model_urls[args.arch],model_dir='./')
+    # pretrained_dict = {}
+    # for key,value in state_dict.items():
+    #     pretrained_dict['base_model.'+key] = value
+    #
+    # model_dict = model.state_dict()
+    #
+    # #filter weight
+    # pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+    # # print(pretrained_dict.keys())
+    #
+    # model_dict.update(pretrained_dict)
+    #
+    # model.load_state_dict(model_dict) #模型加载预训练权重
 
     crop_size = model.crop_size
     scale_size = model.scale_size
@@ -87,7 +86,9 @@ def main():
         data_length = 5
 
     train_loader = torch.utils.data.DataLoader(
-        TSNDataSet("./jpegs_256/", args.train_list, num_segments=args.num_segments,
+        TSNDataSet(root_path="./jpegs_256/" if args.modality=='RGB' else './tvl1_flow/',
+                   list_file=args.train_list,
+                   num_segments=args.num_segments,#默认为3
                    new_length=data_length,
                    modality=args.modality,
                    image_tmpl="frame{:06d}.jpg" if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+"{}_{:05d}.jpg",
@@ -100,11 +101,15 @@ def main():
         batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
 
+
     val_loader = torch.utils.data.DataLoader(
-        TSNDataSet("./jpegs_256/", args.val_list, num_segments=args.num_segments,
+        TSNDataSet(root_path="./jpegs_256/" if args.modality=='RGB' else './tvl1_flow/',
+                   list_file=args.val_list,
+                   num_segments=args.num_segments,
                    new_length=data_length,
                    modality=args.modality,
-                   image_tmpl="frame{:06d}.jpg" if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+"{}_{:05d}.jpg",
+                   # image_tmpl="frame{:06d}.jpg" if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+"{}_{:05d}.jpg",
+                   image_tmpl="frame{:06}.jpg",
                    random_shift=False,
                    transform=torchvision.transforms.Compose([
                        GroupScale(int(scale_size)),
@@ -140,6 +145,7 @@ def main():
 
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch)
+        break
 
         # evaluate on validation set
         if (epoch + 1) % args.eval_freq == 0 or epoch == args.epochs - 1:
@@ -174,7 +180,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
-        # input 每一个sample应该是三张图片。
+        # input 每一个sample应该是三张图片。 Input.size() ==> [16,9,224,224]具体请看model.py文件
+        # taeget.size() == > [16]
         data_time.update(time.time() - end)
 
         target = target.cuda(async=True)
