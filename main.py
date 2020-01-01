@@ -86,7 +86,7 @@ def main():
         data_length = 5
 
     train_loader = torch.utils.data.DataLoader(
-        TSNDataSet(root_path="./jpegs_256/" if args.modality=='RGB' else './tvl1_flow/',
+        TSNDataSet(root_path="./jpegs_256/" if args.modality=='RGB' else '../tvl1_flow/',
                    list_file=args.train_list,
                    num_segments=args.num_segments,#默认为3
                    new_length=data_length,
@@ -104,7 +104,7 @@ def main():
 
 
     val_loader = torch.utils.data.DataLoader(
-        TSNDataSet(root_path="./jpegs_256/" if args.modality=='RGB' else './tvl1_flow/',
+        TSNDataSet(root_path="./jpegs_256/" if args.modality=='RGB' else '../tvl1_flow/',
                    list_file=args.val_list,
                    num_segments=args.num_segments,
                    new_length=data_length,
