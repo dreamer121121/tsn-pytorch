@@ -182,6 +182,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # measure data loading time
         # input 每一个sample应该是三张图片。 Input.size() ==> [16,9,224,224]具体请看model.py文件
         # taeget.size() == > [16]
+        print('input:',input.size())
+        print('target:',target)
         data_time.update(time.time() - end)
 
         target = target.cuda(async=True)
@@ -190,6 +192,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output = model(input_var)
+        break
         loss = criterion(output, target_var)
 
         # measure accuracy and record loss

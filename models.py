@@ -196,11 +196,11 @@ TSN Configurations:
         #input.size()==>(16,9,224,224) #一个batch16段视频，每段视频采集3帧，每帧都为3通道图像。
         #input.view(-1,3,224,224)==>(48,3,224,224) #每一个batch总共16段视频，每段视频采集3帧故总共48帧，每帧图片为3通道。
         base_out = self.base_model(input.view((-1, sample_len) + input.size()[-2:])) #base_out.size() ==> [48,2048],每帧图片通过restnet101后输出2048维特征。
-        print(base_out.size())
+        # print(base_out.size())
 
         if self.dropout > 0:
             base_out = self.new_fc(base_out)
-        print(base_out.size())#[48,101]
+        # print(base_out.size())#[48,101]
         if not self.before_softmax:
             base_out = self.softmax(base_out)
         if self.reshape:
