@@ -230,6 +230,7 @@ TSN Configurations:
         # modify the convolution layers
         # Torch models are usually defined in a hierarchical way.
         # nn.modules.children() return all sub modules in a DFS manner
+        #由于flow-stream的输入为堆叠的光流(stacked optical flow)故输入通道为10，因此需要改变spatial-stream的的卷积层
         modules = list(self.base_model.modules())
         first_conv_idx = list(filter(lambda x: isinstance(modules[x], nn.Conv2d), list(range(len(modules)))))[0]
         conv_layer = modules[first_conv_idx]

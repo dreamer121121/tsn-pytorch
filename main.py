@@ -181,8 +181,12 @@ def train(train_loader, model, criterion, optimizer, epoch):
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
+        #RGB 模态
         # input 每一个sample应该是三张图片。 Input.size() ==> [16,9,224,224]具体请看model.py文件
         # taeget.size() == > [16]
+        #FLOW 模态
+        # Input 每一个sample应该是三个堆叠的光流图堆，Input.size() ==> [16,30,224,224]
+        # taeget.size() ==> 16 batch_size=16，一个batch0总共有16段视频。故总共16个target.
         print('input:',input.size())
         print('target:',target)
         data_time.update(time.time() - end)
