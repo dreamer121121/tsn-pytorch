@@ -91,7 +91,8 @@ def main():
                    num_segments=args.num_segments,#默认为3
                    new_length=data_length,
                    modality=args.modality,
-                   image_tmpl="frame{:06d}.jpg" if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+"{}_{:05d}.jpg",
+                   # image_tmpl="frame{:06d}.jpg" if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+"{}_{:05d}.jpg",
+                   image_tmpl="frame{:06}.jpg",
                    transform=torchvision.transforms.Compose([
                        train_augmentation,
                        Stack(roll=args.arch == 'BNInception'),

@@ -48,6 +48,8 @@ class TSNDataSet(data.Dataset):
         if self.modality == 'RGB' or self.modality == 'RGBDiff':
             return [Image.open(os.path.join(directory, self.image_tmpl.format(idx))).convert('RGB')]
         elif self.modality == 'Flow':
+            print('directory:',directory)
+            print('idx:',idx)
             #每一次返回两张光流图分为x,y方向各一张。
             x_img = Image.open(os.path.join(directory+'/u/', self.image_tmpl.format(idx))).convert('L')
             y_img = Image.open(os.path.join(directory+'/v/', self.image_tmpl.format(idx))).convert('L')
