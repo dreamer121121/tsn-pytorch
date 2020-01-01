@@ -44,15 +44,16 @@ class TSNDataSet(data.Dataset):
 
         self._parse_list()
 
-    def _load_image(self, directory, idx):
+    def _load_image(self, directory,record,idx):
         if self.modality == 'RGB' or self.modality == 'RGBDiff':
+            directory += record.path
             return [Image.open(os.path.join(directory, self.image_tmpl.format(idx))).convert('RGB')]
         elif self.modality == 'Flow':
             print('directory:',directory)
             print('idx:',idx)
             #每一次返回两张光流图分为x,y方向各一张。
-            x_img = Image.open(os.path.join(directory+'/u/', self.image_tmpl.format(idx))).convert('L')
-            y_img = Image.open(os.path.join(directory+'/v/', self.image_tmpl.format(idx))).convert('L')
+            x_img = Image.open(os.path.join(directory+'u/'+record.path, self.image_tmpl.format(idx))).convert('L')
+            y_img = Image.open(os.path.join(directory+'v/'+record.path, self.image_tmpl.format(idx))).convert('L')
 
             return [x_img, y_img]
 
@@ -110,7 +111,7 @@ class TSNDataSet(data.Dataset):
             p = int(seg_ind)
             for i in range(self.new_length):
                 #采集这一段的new_length帧图片，RGB模态的为1帧，optical flow模态的为5帧
-                seg_imgs = self._load_image(self.root_path+record.path, p) #读入一帧图片
+                seg_imgs = self._load_image(self.root_path,record,p) #读入一帧图片
                 images.extend(seg_imgs)
                 if p < record.num_frames:
                     p += 1
