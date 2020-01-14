@@ -3,6 +3,7 @@ from torch import nn
 from ops.basic_ops import ConsensusModule, Identity
 from transforms import *
 from torch.nn.init import normal, constant
+from ops import log #写入文本日志
 
 class TSN(nn.Module):
     def __init__(self, num_class, num_segments, modality,
@@ -26,7 +27,7 @@ class TSN(nn.Module):
         else:
             self.new_length = new_length
 
-        print(("""
+        log(("""
 Initializing TSN with base model: {}.
 TSN Configurations:
     input_modality:     {}
@@ -41,13 +42,13 @@ TSN Configurations:
         feature_dim = self._prepare_tsn(num_class)
 
         if self.modality == 'Flow':
-            print("Converting the ImageNet model to a flow init model")
+            log("Converting the ImageNet model to a flow init model")
             self.base_model = self._construct_flow_model(self.base_model)
-            print("Done. Flow model ready...")
+            log("Done. Flow model ready...")
         elif self.modality == 'RGBDiff':
-            print("Converting the ImageNet model to RGB+Diff init model")
+            log("Converting the ImageNet model to RGB+Diff init model")
             self.base_model = self._construct_diff_model(self.base_model)
-            print("Done. RGBDiff model ready.")
+            log("Done. RGBDiff model ready.")
 
         self.consensus = ConsensusModule(consensus_type)
 
@@ -122,7 +123,7 @@ TSN Configurations:
         super(TSN, self).train(mode)
         count = 0
         if self._enable_pbn:
-            print("Freezing BatchNorm2D except the first one.")
+            log("Freezing BatchNorm2D except the first one.")
             for m in self.base_model.modules():
                 if isinstance(m, nn.BatchNorm2d):
                     count += 1
@@ -188,7 +189,7 @@ TSN Configurations:
         ]
 
     def forward(self, input):
-        sample_len = (3 if self.modality == "RGB" else 2) * self.new_length
+        sample_len = (3 if self.modality == "RGB" else 2) * self.new_length #sample_len表示帧的通道数。
 
         if self.modality == 'RGBDiff':
             sample_len = 3 * self.new_length
@@ -196,11 +197,11 @@ TSN Configurations:
         #input.size()==>(16,9,224,224) #一个batch16段视频，每段视频采集3帧，每帧都为3通道图像。
         #input.view(-1,3,224,224)==>(48,3,224,224) #每一个batch总共16段视频，每段视频采集3帧故总共48帧，每帧图片为3通道。
         base_out = self.base_model(input.view((-1, sample_len) + input.size()[-2:])) #base_out.size() ==> [48,2048],每帧图片通过restnet101后输出2048维特征。
-        # print(base_out.size())
+        # log(base_out.size())
 
         if self.dropout > 0:
             base_out = self.new_fc(base_out)
-        # print(base_out.size())#[48,101]
+        # log(base_out.size())#[48,101]
         if not self.before_softmax:
             base_out = self.softmax(base_out)
         if self.reshape:

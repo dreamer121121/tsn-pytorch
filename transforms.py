@@ -319,4 +319,4 @@ if __name__ == "__main__":
             mean=[.485, .456, .406],
             std=[.229, .224, .225])
     ])
-    print(trans2(color_group))
+    log(trans2(color_group))

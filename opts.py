@@ -35,8 +35,8 @@ parser.add_argument('--clip-gradient', '--gd', default=None, type=float,
 parser.add_argument('--no_partialbn', '--npb', default=False, action="store_true")
 
 # ========================= Monitor Configs ==========================
-parser.add_argument('--print-freq', '-p', default=20, type=int,
-                    metavar='N', help='print frequency (default: 10)')
+parser.add_argument('--log-freq', '-p', default=20, type=int,
+                    metavar='N', help='log frequency (default: 10)')
 parser.add_argument('--eval-freq', '-ef', default=5, type=int,
                     metavar='N', help='evaluation frequency (default: 5)')
 

@@ -1,15 +1,16 @@
 import torch
 import numpy as np
 from sklearn.metrics import confusion_matrix
+import sys
 
 def get_grad_hook(name):
     def hook(m, grad_in, grad_out):
-        print((name, grad_out[0].data.abs().mean(), grad_in[0].data.abs().mean()))
-        print((grad_out[0].size()))
-        print((grad_in[0].size()))
+        log((name, grad_out[0].data.abs().mean(), grad_in[0].data.abs().mean()))
+        log((grad_out[0].size()))
+        log((grad_in[0].size()))
 
-        print((grad_out[0]))
-        print((grad_in[0]))
+        log((grad_out[0]))
+        log((grad_in[0]))
 
     return hook
 
@@ -33,3 +34,11 @@ def class_accuracy(prediction, label):
     mean_cls_acc = cls_acc.mean()
 
     return cls_acc, mean_cls_acc
+
+def log(*args, file=None):
+    """log to a file and console"""
+    if file:
+        log(*args, file=file)
+        file.flush()
+    log(*args)
+    sys.stdout.flush()

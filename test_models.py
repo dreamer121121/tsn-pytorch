@@ -51,7 +51,7 @@ net = TSN(num_class, 1, args.modality,
           dropout=args.dropout)
 
 checkpoint = torch.load(args.weights)
-print("model epoch {} best prec@1: {}".format(checkpoint['epoch'], checkpoint['best_prec1']))
+log("model epoch {} best prec@1: {}".format(checkpoint['epoch'], checkpoint['best_prec1']))
 
 base_dict = {'.'.join(k.split('.')[1:]): v for k,v in list(checkpoint['state_dict'].items())}
 net.load_state_dict(base_dict)
@@ -128,7 +128,7 @@ for i, (data, label) in data_gen:
     rst = eval_video((i, data, label))
     output.append(rst[1:])
     cnt_time = time.time() - proc_start_time
-    print('video {} done, total {}/{}, average {} sec/video'.format(i, i+1,
+    log('video {} done, total {}/{}, average {} sec/video'.format(i, i+1,
                                                                     total_num,
                                                                     float(cnt_time) / (i+1)))
 
@@ -144,9 +144,9 @@ cls_hit = np.diag(cf)
 
 cls_acc = cls_hit / cls_cnt
 
-print(cls_acc)
+log(cls_acc)
 
-print('Accuracy {:.02f}%'.format(np.mean(cls_acc) * 100))
+log('Accuracy {:.02f}%'.format(np.mean(cls_acc) * 100))
 
 if args.save_scores is not None:
 

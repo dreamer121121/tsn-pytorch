@@ -2,6 +2,7 @@ import argparse
 import os
 import time
 import shutil
+import sys
 import torch
 import torchvision
 import torch.nn.parallel
@@ -15,11 +16,18 @@ from models import TSN
 from transforms import *
 from opts import parser
 
+from ops import log #写入文本日志
+
 best_prec1 = 0
 
-model_urls = {
-    'resnet101':'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'
-}
+# model_urls = {
+#     'resnet101':'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'
+# }
+
+log_file = "spatial.log"
+log_stream = open("spatial.log", "a")
+
+
 def main():
     global args, best_prec1
     args = parser.parse_args()
@@ -36,6 +44,7 @@ def main():
     model = TSN(num_class, args.num_segments, args.modality,
                 base_model=args.arch,
                 consensus_type=args.consensus_type, dropout=args.dropout, partial_bn=not args.no_partialbn) #只返回网络结构
+
     # state_dict = model_zoo.load_url(model_urls[args.arch],model_dir='./')
     # pretrained_dict = {}
     # for key,value in state_dict.items():
@@ -45,7 +54,7 @@ def main():
     #
     # #filter weight
     # pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-    # # print(pretrained_dict.keys())
+    # # log(pretrained_dict.keys())
     #
     # model_dict.update(pretrained_dict)
     #
@@ -62,15 +71,15 @@ def main():
 
     if args.resume:
         if os.path.isfile(args.resume):
-            print(("=> loading checkpoint '{}'".format(args.resume)))
+            log(("=> loading checkpoint '{}'".format(args.resume)))
             checkpoint = torch.load(args.resume)
             args.start_epoch = checkpoint['epoch']
             best_prec1 = checkpoint['best_prec1']
             model.load_state_dict(checkpoint['state_dict'])
-            print(("=> loaded checkpoint '{}' (epoch {})"
+            log(("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.evaluate, checkpoint['epoch'])))
         else:
-            print(("=> no checkpoint found at '{}'".format(args.resume)))
+            log(("=> no checkpoint found at '{}'".format(args.resume)))
 
     cudnn.benchmark = True
 
@@ -129,7 +138,7 @@ def main():
         raise ValueError("Unknown loss type")
 
     for group in policies:
-        print(('group: {} has {} params, lr_mult: {}, decay_mult: {}'.format(
+        log(('group: {} has {} params, lr_mult: {}, decay_mult: {}'.format(
             group['name'], len(group['params']), group['lr_mult'], group['decay_mult'])))
 
     optimizer = torch.optim.SGD(policies,
@@ -146,7 +155,7 @@ def main():
 
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch)
-        break
+        # break
 
         # evaluate on validation set
         if (epoch + 1) % args.eval_freq == 0 or epoch == args.epochs - 1:
@@ -187,8 +196,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
         #FLOW 模态
         # Input 每一个sample应该是三个堆叠的光流图堆，Input.size() ==> [16,30,224,224]
         # taeget.size() ==> 16 batch_size=16，一个batch0总共有16段视频。故总共16个target.
-        print('input:',input.size())
-        print('target:',target)
+        # log('input:',input.size())
+        # log('target:',target)
         data_time.update(time.time() - end)
 
         target = target.cuda(async=True)
@@ -197,7 +206,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # compute output
         output = model(input_var)
-        break
+        # break
         loss = criterion(output, target_var)
 
         # measure accuracy and record loss
@@ -215,7 +224,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         if args.clip_gradient is not None:
             total_norm = clip_grad_norm(model.parameters(), args.clip_gradient)
             if total_norm > args.clip_gradient:
-                print("clipping gradient: {} with coef {}".format(total_norm, args.clip_gradient / total_norm))
+                log("clipping gradient: {} with coef {}".format(total_norm, args.clip_gradient / total_norm))
 
         optimizer.step()
 
@@ -223,8 +232,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args.print_freq == 0:
-            print(('Epoch: [{0}][{1}/{2}], lr: {lr:.5f}\t'
+        if i % args.log_freq == 0:
+            log(('Epoch: [{0}][{1}/{2}], lr: {lr:.5f}\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
@@ -264,8 +273,8 @@ def validate(val_loader, model, criterion, iter, logger=None):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args.print_freq == 0:
-            print(('Test: [{0}/{1}]\t'
+        if i % args.log_freq == 0:
+            log(('Test: [{0}/{1}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
@@ -273,7 +282,7 @@ def validate(val_loader, model, criterion, iter, logger=None):
                    i, len(val_loader), batch_time=batch_time, loss=losses,
                    top1=top1, top5=top5)))
 
-    print(('Testing Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f}'
+    log(('Testing Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f}'
           .format(top1=top1, top5=top5, loss=losses)))
 
     return top1.avg

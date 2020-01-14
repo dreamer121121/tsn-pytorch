@@ -6,6 +6,8 @@ import os.path
 import numpy as np
 from numpy.random import randint
 
+from ops import log
+
 class VideoRecord(object):
     def __init__(self, row):
         self._data = row
@@ -49,8 +51,8 @@ class TSNDataSet(data.Dataset):
             directory += record.path
             return [Image.open(os.path.join(directory, self.image_tmpl.format(idx))).convert('RGB')]
         elif self.modality == 'Flow':
-            print('directory:',directory)
-            print('idx:',idx)
+            log('directory:',directory)
+            log('idx:',idx)
             #每一次返回两张光流图分为x,y方向各一张。
             x_img = Image.open(os.path.join(directory+'u/'+record.path, self.image_tmpl.format(idx))).convert('L')
             y_img = Image.open(os.path.join(directory+'v/'+record.path, self.image_tmpl.format(idx))).convert('L')
@@ -104,7 +106,7 @@ class TSNDataSet(data.Dataset):
 
     def get(self, record, indices):
         #获取一段视频的三帧
-        # print(indices)
+        # log(indices)
         images = list()
         for seg_ind in indices:
             #分段采集
