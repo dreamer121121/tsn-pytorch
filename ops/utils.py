@@ -3,6 +3,9 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import sys
 
+log_file = "spatial.log"
+log_stream = open("spatial.log", "a")
+
 def get_grad_hook(name):
     def hook(m, grad_in, grad_out):
         log((name, grad_out[0].data.abs().mean(), grad_in[0].data.abs().mean()))
@@ -35,7 +38,7 @@ def class_accuracy(prediction, label):
 
     return cls_acc, mean_cls_acc
 
-def log(*args, file=None):
+def log(*args, file=log_stream):
     """log to a file and console"""
     if file:
         log(*args, file=file)

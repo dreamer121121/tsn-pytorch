@@ -4,7 +4,6 @@ from ops.basic_ops import ConsensusModule, Identity
 from transforms import *
 from torch.nn.init import normal, constant
 from ops import log #写入文本日志
-from main import log_stream
 
 class TSN(nn.Module):
     def __init__(self, num_class, num_segments, modality,
@@ -36,20 +35,20 @@ TSN Configurations:
     new_length:         {}
     consensus_module:   {}
     dropout_ratio:      {}
-        """.format(base_model, self.modality, self.num_segments, self.new_length, consensus_type, self.dropout)),file=log_stream)
+        """.format(base_model, self.modality, self.num_segments, self.new_length, consensus_type, self.dropout)))
 
         self._prepare_base_model(base_model)
 
         feature_dim = self._prepare_tsn(num_class)
 
         if self.modality == 'Flow':
-            log("Converting the ImageNet model to a flow init model",file=log_stream)
+            log("Converting the ImageNet model to a flow init model")
             self.base_model = self._construct_flow_model(self.base_model)
-            log("Done. Flow model ready...",file=log_stream)
+            log("Done. Flow model ready...")
         elif self.modality == 'RGBDiff':
-            log("Converting the ImageNet model to RGB+Diff init model",file=log_stream)
+            log("Converting the ImageNet model to RGB+Diff init model")
             self.base_model = self._construct_diff_model(self.base_model)
-            log("Done. RGBDiff model ready.",file=log_stream)
+            log("Done. RGBDiff model ready.")
 
         self.consensus = ConsensusModule(consensus_type)
 
