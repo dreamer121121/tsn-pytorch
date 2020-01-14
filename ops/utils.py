@@ -41,7 +41,7 @@ def class_accuracy(prediction, label):
 def log(*args, file=log_stream):
     """log to a file and console"""
     if file:
-        log(*args, file=file)
+        print(*args, file=file)
         file.flush()
     log(*args)
     sys.stdout.flush()
