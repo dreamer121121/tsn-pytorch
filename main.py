@@ -71,15 +71,15 @@ def main():
 
     if args.resume:
         if os.path.isfile(args.resume):
-            log(("=> loading checkpoint '{}'".format(args.resume)))
+            log(("=> loading checkpoint '{}'".format(args.resume)),file=log_stream)
             checkpoint = torch.load(args.resume)
             args.start_epoch = checkpoint['epoch']
             best_prec1 = checkpoint['best_prec1']
             model.load_state_dict(checkpoint['state_dict'])
             log(("=> loaded checkpoint '{}' (epoch {})"
-                  .format(args.evaluate, checkpoint['epoch'])))
+                  .format(args.evaluate, checkpoint['epoch'])),file=log_stream)
         else:
-            log(("=> no checkpoint found at '{}'".format(args.resume)))
+            log(("=> no checkpoint found at '{}'".format(args.resume)),file=log_stream)
 
     cudnn.benchmark = True
 
@@ -139,7 +139,7 @@ def main():
 
     for group in policies:
         log(('group: {} has {} params, lr_mult: {}, decay_mult: {}'.format(
-            group['name'], len(group['params']), group['lr_mult'], group['decay_mult'])))
+            group['name'], len(group['params']), group['lr_mult'], group['decay_mult'])),file=log_stream)
 
     optimizer = torch.optim.SGD(policies,
                                 args.lr,
@@ -224,7 +224,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         if args.clip_gradient is not None:
             total_norm = clip_grad_norm(model.parameters(), args.clip_gradient)
             if total_norm > args.clip_gradient:
-                log("clipping gradient: {} with coef {}".format(total_norm, args.clip_gradient / total_norm))
+                log("clipping gradient: {} with coef {}".format(total_norm, args.clip_gradient / total_norm),file=log_stream)
 
         optimizer.step()
 
@@ -240,7 +240,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
                   'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
-                   data_time=data_time, loss=losses, top1=top1, top5=top5, lr=optimizer.param_groups[-1]['lr'])))
+                   data_time=data_time, loss=losses, top1=top1, top5=top5, lr=optimizer.param_groups[-1]['lr'])),file=log_stream)
 
 
 def validate(val_loader, model, criterion, iter, logger=None):
@@ -280,10 +280,10 @@ def validate(val_loader, model, criterion, iter, logger=None):
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
                   'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                    i, len(val_loader), batch_time=batch_time, loss=losses,
-                   top1=top1, top5=top5)))
+                   top1=top1, top5=top5)),file=log_stream)
 
     log(('Testing Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f}'
-          .format(top1=top1, top5=top5, loss=losses)))
+          .format(top1=top1, top5=top5, loss=losses)),file=log_stream)
 
     return top1.avg
 
