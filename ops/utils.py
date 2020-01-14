@@ -43,5 +43,5 @@ def log(*args, file=log_stream):
     if file:
         print(*args, file=file)
         file.flush()
-    log(*args)
+    print(*args)
     sys.stdout.flush()
