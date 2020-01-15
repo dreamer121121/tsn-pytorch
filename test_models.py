@@ -11,6 +11,8 @@ from models import TSN
 from transforms import *
 from ops import ConsensusModule
 
+from ops import log
+
 # options
 parser = argparse.ArgumentParser(
     description="Standard video-level testing")
@@ -89,7 +91,7 @@ else:
     devices = list(range(args.workers))
 
 
-net = torch.nn.DataParallel(net.cuda(devices[0]), device_ids=devices)
+net = torch.nn.DataParallel(net, device_ids=args.gpus).cuda()
 net.eval()
 
 data_gen = enumerate(data_loader)
