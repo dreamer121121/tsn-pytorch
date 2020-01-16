@@ -22,7 +22,7 @@ parser.add_argument('test_list', type=str)
 parser.add_argument('weights', type=str)
 parser.add_argument('--arch', type=str, default="resnet101")
 parser.add_argument('--save_scores', type=str, default=None)
-parser.add_argument('--test_segments', type=int, default=25)
+parser.add_argument('--test_segments', type=int, default=25)#每段视频采集25帧，每帧通过边角剪裁和中心剪裁扩展成10帧，总共250帧最终取平均得到最终的分类。
 parser.add_argument('--max_num', type=int, default=-1)
 parser.add_argument('--test_crops', type=int, default=10)
 parser.add_argument('--input_size', type=int, default=224)
@@ -71,10 +71,10 @@ else:
     raise ValueError("Only 1 and 10 crops are supported while we got {}".format(args.test_crops))
 
 data_loader = torch.utils.data.DataLoader(
-        TSNDataSet("", args.test_list, num_segments=args.test_segments,
+        TSNDataSet("./jpegs_256/", args.test_list, num_segments=args.test_segments,
                    new_length=1 if args.modality == "RGB" else 5,
                    modality=args.modality,
-                   image_tmpl="img_{:05d}.jpg" if args.modality in ['RGB', 'RGBDiff'] else args.flow_prefix+"{}_{:05d}.jpg",
+                   image_tmpl="frame{:06}.jpg" if args.modality in ['RGB', 'RGBDiff'] else args.flow_prefix+"{}_{:05d}.jpg",
                    test_mode=True,
                    transform=torchvision.transforms.Compose([
                        cropping,
