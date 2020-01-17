@@ -65,7 +65,7 @@ def main():
     policies = model.get_optim_policies()
     train_augmentation = model.get_augmentation()
 
-    model = torch.nn.DataParallel(model, device_ids=args.gpus).cuda()
+    model = torch.nn.DataParallel(model, device_ids=args.gpus).cuda() #实现单机多卡的分布式训练。
 
     if args.resume:
         if os.path.isfile(args.resume):

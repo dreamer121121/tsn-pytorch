@@ -85,11 +85,12 @@ data_loader = torch.utils.data.DataLoader(
         batch_size=1, shuffle=False,
         num_workers=args.workers * 2, pin_memory=True)
 
-if args.gpus is not None:
-    devices = [args.gpus[i] for i in range(args.workers)]
-else:
-    devices = list(range(args.workers))
 
+# if args.gpus is not None:
+#     devices = [args.gpus[i] for i in range(args.workers)]
+# else:
+#     devices = list(range(args.workers))
+#
 
 net = torch.nn.DataParallel(net, device_ids=args.gpus).cuda()
 net.eval()
@@ -113,11 +114,15 @@ def eval_video(video_data):
     else:
         raise ValueError("Unknown modality "+args.modality)
 
-    input_var = torch.autograd.Variable(data.view(-1, length, data.size(2), data.size(3)),
-                                        volatile=True)
-    rst = net(input_var).data.cpu().numpy().copy()
+    input_var = torch.autograd.Variable(data.view(-1, length, data.size(2), data.size(3)), #[250,3,224,224]
+                                        volatile=True) #volatile表示是否处于推理
+    rst = []
+    for i in range(0,5):
+        tmp = net(input_var[50*i:50*(i+1)]).data.cpu().numpy().copy() #将结果拷贝到CPU上
+        rst.append(tmp)
+    rst = np.array(rst)
     return i, rst.reshape((num_crop, args.test_segments, num_class)).mean(axis=0).reshape(
-        (args.test_segments, 1, num_class)
+        (args.test_segments, 1, num_class)  #(5,1,101)
     ), label[0]
 
 
@@ -125,9 +130,10 @@ proc_start_time = time.time()
 max_num = args.max_num if args.max_num > 0 else len(data_loader.dataset)
 
 for i, (data, label) in data_gen:
+    #data.size() [1,150,224,224] 当设test_segments = 5
     if i >= max_num:
         break
-    rst = eval_video((i, data, label))
+    rst = eval_video((i, data, label)) #tuple
     output.append(rst[1:])
     cnt_time = time.time() - proc_start_time
     log('video {} done, total {}/{}, average {} sec/video'.format(i, i+1,
@@ -139,12 +145,12 @@ video_pred = [np.argmax(np.mean(x[0], axis=0)) for x in output]
 video_labels = [x[1] for x in output]
 
 
-cf = confusion_matrix(video_labels, video_pred).astype(float)
+cf = confusion_matrix(video_labels, video_pred).astype(float) #创建混淆矩阵。
 
-cls_cnt = cf.sum(axis=1)
-cls_hit = np.diag(cf)
+cls_cnt = cf.sum(axis=1) #总共的视频数量。
+cls_hit = np.diag(cf) #正确预测的数量
 
-cls_acc = cls_hit / cls_cnt
+cls_acc = cls_hit / cls_cnt #准确率。
 
 log(cls_acc)
 
