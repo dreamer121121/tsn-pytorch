@@ -133,7 +133,7 @@ for i, (data, label) in data_gen:
     #data.size() [1,150,224,224] 当设test_segments = 5
     if i >= max_num:
         break
-    rst = eval_video((i, data, label)) #tuple
+    rst = eval_video((i, data, label)) #tuple #处理一段视频
     output.append(rst[1:])
     cnt_time = time.time() - proc_start_time
     log('video {} done, total {}/{}, average {} sec/video'.format(i, i+1,
